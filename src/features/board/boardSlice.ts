@@ -5,9 +5,12 @@ import { BorderDimension } from '../../types/BorderDimension.ts';
 import { Coordinates } from '../../types/Coordinates.ts';
 import {
 	addElementToField,
+	createEmptyBoard,
 	findNearestMatch,
+	getFieldSafely,
 	isAvailablePlace,
 	removeElementFromField,
+	validateBoardState,
 } from '../../utils/boardUtils.ts';
 
 const initialState: BoardData = {
@@ -19,43 +22,43 @@ const boardSlice = createSlice({
 	initialState,
 	reducers: {
 		setBoard: (state, action: PayloadAction<BorderDimension>) => {
-			state.fields = Array.from({ length: action.payload.rows }, () =>
-				Array.from({ length: action.payload.columns }, () => ({
-					element: null,
-					isAvailable: true,
-				}))
-			);
+			state.fields = createEmptyBoard(action.payload.rows, action.payload.columns);
 		},
 		setElement: (state, action: PayloadAction<BoardElement>) => {
-			if (!state.fields.length) return;
+			validateBoardState(state);
 
 			const element = action.payload;
 
-			if (!element) return;
+			if (!element) throw new Error('No element was provided.');
 
-			const field = state.fields[element.y][element.x];
+			const field = getFieldSafely(state, element.y, element.x);
 
 			if (field.isAvailable) {
 				field.element = element;
 				field.isAvailable = false;
+			} else {
+				throw new Error('The target field is not available.');
 			}
 		},
 		moveElement: (state, action: PayloadAction<{ elementToMove: BoardElement; newCoordinates: Coordinates }>) => {
-			if (!state.fields.length) return;
+			validateBoardState(state);
+
 			const { elementToMove, newCoordinates } = action.payload;
-			const fieldElementToMove = state.fields[elementToMove.y][elementToMove.x];
-			const newField = state.fields[newCoordinates.y][newCoordinates.x];
+			const fieldElementToMove = getFieldSafely(state, elementToMove.y, elementToMove.x);
+			const newField = getFieldSafely(state, newCoordinates.y, newCoordinates.x);
 
 			if (elementToMove && newField?.isAvailable) {
 				removeElementFromField(fieldElementToMove);
 				addElementToField(newField, elementToMove, { x: newCoordinates.x, y: newCoordinates.y });
+			} else {
+				throw new Error('The new field is not available for placement.');
 			}
 		},
 		setNewAdjacentElement: (
 			state,
 			action: PayloadAction<{ startElementCoordinates: Coordinates; newElement: BoardElement }>
 		) => {
-			if (!state.fields.length) return;
+			validateBoardState(state);
 
 			const { startElementCoordinates, newElement } = action.payload;
 
@@ -66,9 +69,9 @@ const boardSlice = createSlice({
 			);
 
 			if (!nearestAvailablePlace) {
-				return;
+				throw new Error();
 			}
-			const newField = state.fields[nearestAvailablePlace.y][nearestAvailablePlace.x];
+			const newField = getFieldSafely(state, nearestAvailablePlace.y, nearestAvailablePlace.x);
 
 			addElementToField(newField, newElement, { x: nearestAvailablePlace.x, y: nearestAvailablePlace.y });
 		},

@@ -75,3 +75,26 @@ export const removeElementFromField = (field: BoardField) => {
 	field.element = null;
 	field.isAvailable = true;
 };
+
+export const validateBoardState = (state: BoardData): void => {
+	if (!state.fields.length) {
+		throw new Error('Fields array is empty');
+	}
+};
+
+export const getFieldSafely = (state: BoardData, y: number, x: number): BoardField => {
+	const field = state.fields[y]?.[x];
+	if (!field) {
+		throw new Error(`Invalid coordinates: ${y}, ${x}`);
+	}
+	return field;
+};
+
+export const createEmptyBoard = (rows: number, columns: number): BoardField[][] => {
+	return Array.from({ length: rows }, () =>
+		Array.from({ length: columns }, () => ({
+			element: null,
+			isAvailable: true,
+		}))
+	);
+};

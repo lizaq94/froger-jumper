@@ -36,7 +36,7 @@ export const Board: React.FC<IProps> = (props): JSX.Element => {
 				board,
 				isOppositeSexPartner,
 				selectedFrog,
-				1
+				0
 			);
 
 			if (nearestFrogPartnerCoordinates)
