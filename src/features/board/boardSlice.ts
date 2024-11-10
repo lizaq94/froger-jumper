@@ -69,7 +69,7 @@ const boardSlice = createSlice({
 			);
 
 			if (!nearestAvailablePlace) {
-				throw new Error();
+				throw new Error('No nearest available place found.');
 			}
 			const newField = getFieldSafely(state, nearestAvailablePlace.y, nearestAvailablePlace.x);
 
