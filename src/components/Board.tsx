@@ -107,7 +107,7 @@ export const Board: React.FC<IProps> = (props): JSX.Element => {
 		const reproducerButtonEnabled = selectedFrog && selectedFrogPartner;
 
 		return (
-			<div className="flex flex-col gap-5 ml-5">
+			<div className="flex flex-col gap-5 ml-0 mb-4 md:ml-5 md:mb-0">
 				<Button isDisabled={!moveButtonEnabled} onClick={moveHandler}>
 					Move
 				</Button>
@@ -120,7 +120,7 @@ export const Board: React.FC<IProps> = (props): JSX.Element => {
 	};
 
 	const renderField = (element: BoardElement | null, coordinates: Coordinates) => (
-		<div className="w-20 h-20 border flex justify-center items-center has-[.selected]:border-blue-500">
+		<div className="w-12 h-12 md:w-20 md:h-20 border flex justify-center items-center has-[.selected]:border-blue-500">
 			{element ? (
 				<Frog
 					frogData={element}
@@ -157,7 +157,7 @@ export const Board: React.FC<IProps> = (props): JSX.Element => {
 					Start
 				</button>
 			)}
-			<div className="flex">
+			<div className="flex flex-col-reverse md:flex-row">
 				{renderBoard(board)}
 				{isBoardExist && <div>{renderRightSide()}</div>}
 			</div>
