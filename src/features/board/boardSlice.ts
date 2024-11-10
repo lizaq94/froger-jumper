@@ -4,6 +4,7 @@ import { BoardElement } from '../../interfaces/BoardElement.ts';
 import { BoardField } from '../../types/BoardField.ts';
 import { BorderDimension } from '../../types/BorderDimension.ts';
 import { Coordinates } from '../../types/Coordinates.ts';
+import { isAvailablePlace, findNearestMatch } from '../../utils/boardUtils.ts';
 
 const initialState: BoardData = {
 	fields: [],
@@ -19,53 +20,6 @@ const addElementToField = (field: BoardField, element: BoardElement, coordinates
 const removeField = (field: BoardField) => {
 	field.element = null;
 	field.isAvailable = true;
-};
-
-const isCoordinatesAreOnBoard = (x: number, y: number, board: BoardData): boolean => {
-	const rows = board.fields.length;
-	const columns = board.fields[0].length;
-
-	return x >= 0 && x < columns && y >= 0 && y < rows;
-};
-
-const findNearestAvailablePlace = (startCoordinates: Coordinates, board: BoardData): Coordinates | null => {
-	const directions = [
-		[0, 1],
-		[1, 0],
-		[0, -1],
-		[-1, 0],
-		[1, 1],
-		[-1, -1],
-		[1, -1],
-		[-1, 1],
-	];
-
-	const queue = [startCoordinates];
-	const visited = new Set();
-	visited.add(`${startCoordinates.x},${startCoordinates.y}`);
-
-	while (queue.length > 0) {
-		const { x, y }: Coordinates = queue.shift()!;
-
-		for (const [directionX, directionY] of directions) {
-			const newX = x + directionX;
-			const newY = y + directionY;
-
-			const isNewCoordinatesAreOnBoard = isCoordinatesAreOnBoard(newX, newY, board);
-			const isNewPlaceIsAvailable = isNewCoordinatesAreOnBoard && board.fields[newY][newX].isAvailable;
-
-			if (isNewPlaceIsAvailable) {
-				return { x: newX, y: newY };
-			}
-
-			if (!visited.has(`${newX},${newY}`) && isNewCoordinatesAreOnBoard) {
-				visited.add(`${newX},${newY}`);
-				queue.push({ x: newX, y: newY });
-			}
-		}
-	}
-
-	return null;
 };
 
 const boardSlice = createSlice({
@@ -114,17 +68,18 @@ const boardSlice = createSlice({
 
 			const { startElementCoordinates, newElement } = action.payload;
 
-			const nearestPlaceCoordinates = findNearestAvailablePlace(
+			const nearestAvailablePlace = findNearestMatch(
 				{ x: startElementCoordinates.x, y: startElementCoordinates.y },
-				state
+				state,
+				isAvailablePlace
 			);
 
-			if (!nearestPlaceCoordinates) {
+			if (!nearestAvailablePlace) {
 				return;
 			}
-			const newField = state.fields[nearestPlaceCoordinates.y][nearestPlaceCoordinates.x];
+			const newField = state.fields[nearestAvailablePlace.y][nearestAvailablePlace.x];
 
-			addElementToField(newField, newElement, { x: nearestPlaceCoordinates.x, y: nearestPlaceCoordinates.y });
+			addElementToField(newField, newElement, { x: nearestAvailablePlace.x, y: nearestAvailablePlace.y });
 		},
 	},
 });
