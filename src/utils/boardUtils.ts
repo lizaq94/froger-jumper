@@ -1,5 +1,6 @@
 import { BoardData } from '../interfaces/BoardData.ts';
 import { BoardElement } from '../interfaces/BoardElement.ts';
+import { BoardField } from '../types/BoardField.ts';
 import { Coordinates } from '../types/Coordinates.ts';
 import { SearchCriteria } from '../types/SearchCriteria.ts';
 
@@ -63,4 +64,14 @@ export const isOppositeSexPartner = (x: number, y: number, board: BoardData, ele
 
 export const isAvailablePlace = (x: number, y: number, board: BoardData): boolean => {
 	return board.fields[y][x].isAvailable;
+};
+
+export const addElementToField = (field: BoardField, element: BoardElement, coordinates: Coordinates): void => {
+	field.element = { ...element, x: coordinates.x, y: coordinates.y };
+	field.isAvailable = false;
+};
+
+export const removeElementFromField = (field: BoardField) => {
+	field.element = null;
+	field.isAvailable = true;
 };

@@ -66,20 +66,8 @@ export const Board: React.FC<IProps> = (props): JSX.Element => {
 		};
 
 		dispatch(setBoard({ columns, rows }));
-		dispatch(
-			setElement({
-				x: 3,
-				y: 3,
-				element: maleFrog,
-			})
-		);
-		dispatch(
-			setElement({
-				x: 4,
-				y: 3,
-				element: femaleFrog,
-			})
-		);
+		dispatch(setElement(maleFrog));
+		dispatch(setElement(femaleFrog));
 	};
 
 	const selectFrogHandler = (element: BoardElement) => {
@@ -88,9 +76,10 @@ export const Board: React.FC<IProps> = (props): JSX.Element => {
 	};
 
 	const moveHandler = () => {
+		if (!selectedFrog) return;
 		dispatch(
 			moveElement({
-				elementCoordinates: { x: selectedFrog!.x, y: selectedFrog!.y },
+				elementToMove: selectedFrog,
 				newCoordinates: { x: fieldToMove!.x, y: fieldToMove!.y },
 			})
 		);

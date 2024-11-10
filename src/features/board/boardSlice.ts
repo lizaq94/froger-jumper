@@ -1,25 +1,17 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { BoardData } from '../../interfaces/BoardData.ts';
 import { BoardElement } from '../../interfaces/BoardElement.ts';
-import { BoardField } from '../../types/BoardField.ts';
 import { BorderDimension } from '../../types/BorderDimension.ts';
 import { Coordinates } from '../../types/Coordinates.ts';
-import { isAvailablePlace, findNearestMatch } from '../../utils/boardUtils.ts';
+import {
+	addElementToField,
+	findNearestMatch,
+	isAvailablePlace,
+	removeElementFromField,
+} from '../../utils/boardUtils.ts';
 
 const initialState: BoardData = {
 	fields: [],
-};
-
-const addElementToField = (field: BoardField, element: BoardElement, coordinates: Coordinates): void => {
-	element.x = coordinates.x;
-	element.y = coordinates.y;
-	field.element = element;
-	field.isAvailable = false;
-};
-
-const removeField = (field: BoardField) => {
-	field.element = null;
-	field.isAvailable = true;
 };
 
 const boardSlice = createSlice({
@@ -34,29 +26,28 @@ const boardSlice = createSlice({
 				}))
 			);
 		},
-		setElement: (state, action: PayloadAction<Coordinates & { element: BoardElement }>) => {
+		setElement: (state, action: PayloadAction<BoardElement>) => {
 			if (!state.fields.length) return;
 
-			const { x, y, element } = action.payload;
-			const field = state.fields[y][x];
+			const element = action.payload;
+
+			if (!element) return;
+
+			const field = state.fields[element.y][element.x];
 
 			if (field.isAvailable) {
 				field.element = element;
 				field.isAvailable = false;
 			}
 		},
-		moveElement: (
-			state,
-			action: PayloadAction<{ elementCoordinates: Coordinates; newCoordinates: Coordinates }>
-		) => {
+		moveElement: (state, action: PayloadAction<{ elementToMove: BoardElement; newCoordinates: Coordinates }>) => {
 			if (!state.fields.length) return;
-			const { elementCoordinates, newCoordinates } = action.payload;
-			const fieldElementToMove = state.fields[elementCoordinates.y][elementCoordinates.x];
-			const elementToMove = fieldElementToMove?.element;
+			const { elementToMove, newCoordinates } = action.payload;
+			const fieldElementToMove = state.fields[elementToMove.y][elementToMove.x];
 			const newField = state.fields[newCoordinates.y][newCoordinates.x];
 
 			if (elementToMove && newField?.isAvailable) {
-				removeField(fieldElementToMove);
+				removeElementFromField(fieldElementToMove);
 				addElementToField(newField, elementToMove, { x: newCoordinates.x, y: newCoordinates.y });
 			}
 		},
