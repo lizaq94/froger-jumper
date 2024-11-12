@@ -120,7 +120,10 @@ export const Board: React.FC<IProps> = (props): JSX.Element => {
 	};
 
 	const renderField = (element: BoardElement | null, coordinates: Coordinates) => (
-		<div className="w-12 h-12 md:w-20 md:h-20 border flex justify-center items-center has-[.selected]:border-blue-500">
+		<div
+			className="w-12 h-12 md:w-20 md:h-20 border flex justify-center items-center has-[.selected]:border-blue-500"
+			key={`${coordinates.y - coordinates.x}`}
+		>
 			{element ? (
 				<Frog
 					frogData={element}
